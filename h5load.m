@@ -16,6 +16,7 @@ function data=h5load(filename, path)
 
 % Author: Pauli Virtanen <pav@iki.fi>
 % This script is in the Public Domain. No warranty.
+% Karina 04/01/2021 version
 
 if nargin > 1
     path_parts = regexp(path, '/', 'split');
@@ -58,9 +59,17 @@ for j_item=0:num_objs-1
     
     name = regexprep(objname, '.*/', '');
     name2 = name;
-	name2(regexp(name2,'[{,}]'))=[]
+	name2(regexp(name2,'[{,}]'))=[];
+	name2(regexp(name2,'[\-]'))=['_'];
     if isempty(regexp(name, '^[a-zA-Z].*', 'ONCE'))
-        name2 = char("I" + name);
+        name2 = char('I' + name);
+        
+    end
+    
+    % KISA: length of the audio devices name is greater than 63 which is
+    % max length of a variable name in MATLAB, so we have to cut it
+    if contains(name2, 'AUDIO_alsa_input_usb_Burr_Brown_from_TI_USB_Audio_CODEC_00_analog_stereo')
+        name2 = ['AUDIO', name2(73:end)];
     end
     
     % Group
@@ -106,7 +115,7 @@ function [status,data] = load_one_attribute(obj_id,attr_name,info,data)
     attr_id = H5A.open(obj_id, attr_name);
     name2 = attr_name;
     if isempty(regexp(attr_name, '^[a-zA-Z].*', 'ONCE'))
-        name2 = char("I" + attr_name);
+        name2 = char('I' + attr_name);
     end
     
     try
