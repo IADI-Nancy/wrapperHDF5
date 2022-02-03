@@ -118,12 +118,15 @@ class h5Wrapper(H5Object):
         serieNumber : np.uint16
             Number of serie in the acquisition.
         """
+        
+        tmpTime = datetime.datetime.strptime(examDate, "%d/%m/%Y %H:%M:%S")
+        
         self.attributes = H5Object()
         self.attributes.DATA_TYPE = dataType
         self.attributes.DATA_WRITER = dataWriter
         self.attributes.PLUGIN_SHA1 = writerVersion
-        self.attributes.examDate = examDate
-        self.attributes.examDTimestamp = time.mktime(datetime.datetime.strptime(examDate, "%d/%m/%Y %H:%M:%S").timetuple())
+        self.attributes.examDate = tmpTime.strftime("%Y%m%d-%H%M%S")
+        self.attributes.examTimestamp = time.mktime(tmpTime.timetuple())
         self.attributes.patientName = patientName
         self.attributes.serieNumber = serieNumber
 

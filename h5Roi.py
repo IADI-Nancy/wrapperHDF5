@@ -66,7 +66,7 @@ class h5Roi(h5Wrapper):
         """
         
         obj = cls()
-        repo = git.Repo(search_parent_directories=True)
+        repo = git.Repo(__file__ , search_parent_directories=True)
         obj.setMetaData("ROI", "python", repo.head.object.hexsha, examDate, patientName, serieNumber)
         obj.attributes.pixelSpacing = pixelSpacing
         obj.ROI = H5Object()
@@ -131,21 +131,31 @@ class h5Roi(h5Wrapper):
         self.ROI.attributes.names.append(name)
         self.ROI.attributes.operators.append(operator)
 
-        pows = self.ROI.attributes.pows.deepcopy()
+        pows = self.ROI.attributes.pows.copy()
         pows.sort()
         ipow = 0;
         for i in range(64):
-            if i - 1 >= pows.len() or i != pows[i]:
+            if i >= len(pows) or i != pows[i]:
                 ipow = i
                 break
 
         self.ROI.attributes.pows.append(ipow)
+        self.ROI.rois.append(np.zeros(self.ROI.values.shape, dtype=np.bool))
+        
+        return ipow
 
-    def removeRoi(self, index) -> None:
+    def removeRoi(self, ipow) -> None:
+        index  = -1
+        for tmpIPow, tmpPow in enumerate(self.ROI.attributes.pows):
+            if tmpPow == ipow:
+                index = tmpIPow;
+                break
+        
         del self.ROI.attributes.colors[index]
         del self.ROI.attributes.dates[index]
         del self.ROI.attributes.names[index]
         del self.ROI.attributes.operators[index]
+        del self.ROI.rois[index]
         del self.ROI.attributes.pows[index]
 
     def __convertH5toRoi(self):
