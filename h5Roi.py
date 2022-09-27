@@ -7,11 +7,11 @@ Created on Thu Jul 25 14:46:04 2019
 """
 
 from __future__ import annotations
-from h5Wrapper import h5Wrapper, H5Object, H5Attributes
+from h5wrapper.h5Wrapper import h5Wrapper, H5Object, H5Attributes
 import numpy as np
 import git
 import os
-import datetime
+from datetime import datetime
 import random
 
 class h5Roi(h5Wrapper):
@@ -117,13 +117,13 @@ class h5Roi(h5Wrapper):
             operator = getUserName()
 
         if date == "":
-            date =  datetime.date.now().strftime("%Y/%m/%d %H:%M:%S")
+            date =  datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
         if color == "":
             color = "#"
-            color += "%0.2X" % (random() * 255)
-            color += "%0.2X" % (random() * 255)
-            color += "%0.2X" % (random() * 255)
+            color += "%0.2X" % (int(random.random() * 255))
+            color += "%0.2X" % (int(random.random() * 255))
+            color += "%0.2X" % (int(random.random() * 255))
             color += "80"
 
         self.ROI.attributes.colors.append(color)
