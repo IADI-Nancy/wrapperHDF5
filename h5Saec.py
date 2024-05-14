@@ -10,6 +10,7 @@ from h5Wrapper import h5Wrapper, H5Object, H5Attributes, WrongFileFormatError
 import numpy as np
 import git #GitPython
 import pandas as pd
+import pathlib
 
 class h5Saec(h5Wrapper):
     """
@@ -58,7 +59,7 @@ class h5Saec(h5Wrapper):
             new object.
         """
         obj = cls()
-        repo = git.Repo(search_parent_directories=True)
+        repo = git.Repo(pathlib.Path(__file__).parent.resolve(), search_parent_directories=True)
         obj.setMetaData("SAEC", "python", repo.head.object.hexsha, examDate, patientName, serieNumber)
         obj.attributes.tickTo1s = np.uint64(1000000000)
 
@@ -139,7 +140,7 @@ class h5Saec(h5Wrapper):
         device.attributes.deviceProcessing = deviceProcessing
         device.attributes.hardwareConfig = ""
 
-        parent[deviceType + "_" + communicationId] = device
+        setattr(parent, deviceType + "_" + communicationId, device)
 
         return device
         
@@ -199,7 +200,7 @@ class h5Saec(h5Wrapper):
         """
         sensor = H5Object()
         sensor.attributes = H5Attributes()
-        sensor.attributes.senorType = senorType
+        sensor.attributes.sensorType = senorType
         sensor.attributes.sensorName = sensorName
         sensor.attributes.channelLSBValue = channelLSBValue
         sensor.attributes.channelOffsetValue = channelOffsetValue
@@ -207,8 +208,10 @@ class h5Saec(h5Wrapper):
         sensor.attributes.channelMaxValue = channelMaxValue
         sensor.attributes.sensorFreq = sensorFreq
         sensor.attributes.sensorResolution = sensorResolution
+        sensor.attributes.typeName = typeName
+        sensor.attributes.typeUnit = typeUnit
         
-        if parent.attributes.hassattr("hardwareConfig"):
+        if hasattr(parent.attributes, "hardwareConfig"):
             parent.attributes.hardwareConfig += "_" + senorType + str(len(channelsNames))
         
         sensor.timestamp = H5Object()
@@ -221,7 +224,7 @@ class h5Saec(h5Wrapper):
         sensor.datas.values = []
         sensor.datas.type = internalType
         
-        parent[sensorName] = sensor
+        setattr(parent, sensorName, sensor)
          
         return sensor
 
@@ -274,8 +277,9 @@ class h5Saec(h5Wrapper):
                     
                 if hasattr(value, "datas"):
                     #convert data from physical unit to LSB
-                    value.datas.values = (value.datas.values - data.attributes.channelOffsetValue) / data.attributes.channelLSBValue
+                    value.datas.values = (value.datas.values - value.attributes.channelOffsetValue) / value.attributes.channelLSBValue
             
-            value = cls.__convertSaecToH5(value)
+            if hasattr(value, 'attributes'):
+                h5Saec.__convertSaecToH5(value)
 
         return data

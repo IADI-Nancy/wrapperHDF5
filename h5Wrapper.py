@@ -126,9 +126,9 @@ class h5Wrapper(H5Object):
         self.attributes.DATA_WRITER = dataWriter
         self.attributes.PLUGIN_SHA1 = writerVersion
         self.attributes.examDate = tmpTime.strftime("%Y%m%d-%H%M%S")
-        self.attributes.examTimestamp = time.mktime(tmpTime.timetuple())
+        self.attributes.examTimestamp = int(time.mktime(tmpTime.timetuple()))
         self.attributes.patientName = patientName
-        self.attributes.serieNumber = serieNumber
+        self.attributes.serieNumber = np.uint16(serieNumber)
 
     def loadFile(self, fileName: str) -> None:
         """
@@ -187,9 +187,8 @@ class h5Wrapper(H5Object):
             else :
                 if hasattr(value, 'values'):
                     handle2 = handle.create_dataset(attr, data=value.values, compression="gzip", chunks=np.shape(value.values), compression_opts=9)
-                    if hasattr(value, 'attributes'):
-                        for attr2, value2 in value.attributes.__dict__.items():
-                            handle2.attrs[attr2] = value2
-                else:
+                elif hasattr(value, 'attributes'):
                     handle2 = handle.create_group(attr)
+
+                if hasattr(value, 'attributes'):
                     cls.__convertToH5(handle2, value)
