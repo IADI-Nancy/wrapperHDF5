@@ -1,6 +1,4 @@
-function data = h5RoiSave(filename)
-    data = h5load(filename);
-    
+function data = h5RoiSave(filename, data)
     data.ROI.values = uint64(zeros(size(data.ROI.values));
     
     i = 1;
@@ -10,5 +8,7 @@ function data = h5RoiSave(filename)
         
         i = i + 1;
     end
+
+    h5save(filename, data);
 end  
     
